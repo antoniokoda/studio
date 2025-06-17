@@ -1,9 +1,10 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { AreaChart, BarChart, DollarSign, Users, Activity, CheckCircle, Bell, PhoneOutgoing, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { AreaChart, BarChart, DollarSign, Users, Activity, CheckCircle, Bell, PhoneOutgoing, ArrowUpRight, ArrowDownRight, Briefcase } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
