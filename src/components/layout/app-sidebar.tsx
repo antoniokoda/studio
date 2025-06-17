@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Users, Phone, Briefcase, Settings, Building, LogOut, ListChecks } from 'lucide-react'; // Added ListChecks for Tasks
+import { LayoutDashboard, Users, Phone, Briefcase, Settings, Building, LogOut, ListChecks } from 'lucide-react';
 import { useAuth } from '@/contexts/auth-context';
 
 const navItems = [
@@ -14,7 +14,7 @@ const navItems = [
   { href: '/clients', label: 'Clients', icon: Users },
   { href: '/opportunities', label: 'Opportunities', icon: Briefcase },
   { href: '/calls', label: 'Calls', icon: Phone },
-  { href: '/tasks', label: 'Tasks', icon: ListChecks }, // Added Tasks
+  { href: '/tasks', label: 'Tasks', icon: ListChecks },
 ];
 
 const AppSidebar = () => {
@@ -37,12 +37,15 @@ const AppSidebar = () => {
             <SidebarMenuItem key={item.href}>
               <Link href={item.href} asChild>
                 <SidebarMenuButton
+                  asChild // Ensure SidebarMenuButton acts as a Slot for Link
                   isActive={pathname.startsWith(item.href)}
                   tooltip={{ children: item.label, side: 'right', align: 'center' }}
                   className="justify-start"
                 >
-                  <item.icon className="h-5 w-5" />
-                  <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                  <> {/* Use a fragment if SidebarMenuButton's Slot needs a single child wrapper, though often not needed if Slot handles multiple children correctly */}
+                    <item.icon className="h-5 w-5" />
+                    <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                  </>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -55,12 +58,15 @@ const AppSidebar = () => {
           <SidebarMenuItem>
             <Link href="/settings" asChild>
               <SidebarMenuButton
+                asChild // Ensure SidebarMenuButton acts as a Slot for Link
                 tooltip={{ children: 'Settings', side: 'right', align: 'center' }}
                 className="justify-start"
                 isActive={pathname === '/settings'}
               >
-                <Settings className="h-5 w-5" />
-                <span className="group-data-[collapsible=icon]:hidden">Settings</span>
+                <>
+                  <Settings className="h-5 w-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">Settings</span>
+                </>
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
