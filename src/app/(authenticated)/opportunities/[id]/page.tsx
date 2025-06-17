@@ -11,15 +11,14 @@ import {
     OpportunityNote, sampleOpportunityNotes,
     OpportunityFile, sampleOpportunityFiles,
     OpportunityContact, sampleOpportunityContacts,
-    OpportunityStatus
+    OpportunityStatus,
+    sampleProcesses, // For AI Assistant context
+    sampleStages    // For AI Assistant context
 } from '@/types/crm';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ArrowLeft, Bot, Edit, MessageSquare, Zap, DollarSign, CalendarDays, User, Briefcase, Phone, Paperclip, Users2, StickyNote, FileText } from 'lucide-react';
+import { ArrowLeft, Bot, Edit, MessageSquare, Zap, DollarSign, CalendarDays, User, Briefcase, Phone, Paperclip, Users2, StickyNote, FileText, ListChecks } from 'lucide-react'; // Added ListChecks
 import { useToast } from '@/hooks/use-toast';
 import Link from 'next/link';
 
@@ -27,7 +26,7 @@ import Link from 'next/link';
 import { suggestFollowUpActions, SuggestFollowUpActionsInput } from '@/ai/flows/call-assistant';
 import { generateTalkingPoints, GenerateTalkingPointsInput } from '@/ai/flows/generate-talking-points';
 
-// Placeholder for AI Assistant Component
+// AI Assistant Component (remains largely the same)
 const AiAssistant = ({ opportunity, relatedCalls }: { opportunity: Opportunity, relatedCalls: Call[] }) => {
   const [talkingPoints, setTalkingPoints] = useState<string[]>([]);
   const [followUpActions, setFollowUpActions] = useState<string[]>([]);
@@ -150,6 +149,19 @@ export default function OpportunityDetailPage() {
     }
   }, [opportunityId]);
 
+  const handleOpportunityUpdate = (updatedOpportunity: Opportunity) => {
+    // This function would ideally save to a backend.
+    // For now, it updates the local state of this page.
+    setOpportunity(updatedOpportunity);
+    // Also update the master list in sampleOpportunities if you want changes to persist across navigations (for demo only)
+    const index = sampleOpportunities.findIndex(op => op.id === updatedOpportunity.id);
+    if (index !== -1) {
+      sampleOpportunities[index] = updatedOpportunity;
+    }
+    toast({ title: "Opportunity Updated", description: "Details saved." });
+  };
+
+
   if (!opportunity) {
     return (
       <div className="text-center py-10">
@@ -180,9 +192,9 @@ export default function OpportunityDetailPage() {
         <Button onClick={() => router.push('/opportunities')} variant="outline" size="sm">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Opportunities
         </Button>
-        {/* TODO: Implement edit functionality by linking to the form with opportunity data */}
-        <Button size="sm" onClick={() => toast({title: "Edit Clicked", description:"Edit functionality to be implemented by pre-filling the form."})}>
-          <Edit className="mr-2 h-4 w-4" /> Edit Opportunity
+        {/* The Edit button here could open a modal/form specific to this full page, or be removed if all editing happens in the list view's sheet */}
+        <Button size="sm" onClick={() => toast({title: "Edit Action", description:"Full page edit functionality could be implemented here, or rely on the sheet from the main list."})}>
+          <Edit className="mr-2 h-4 w-4" /> Edit (Full Page)
         </Button>
       </div>
 
@@ -280,7 +292,7 @@ export default function OpportunityDetailPage() {
                     <CardTitle className="text-base">Client Information</CardTitle>
                 </CardHeader>
                 <CardContent className="text-sm space-y-1">
-                    <p><strong>Name:</strong> <Link href={`/clients/${opportunity.clientId}`} className="text-primary hover:underline">{client.name}</Link></p>
+                    <p><strong>Name:</strong> <Link href={`/clients/${client.id}`} className="text-primary hover:underline">{client.name}</Link></p>
                     <p><strong>Company:</strong> {client.company || 'N/A'}</p>
                     <p><strong>Email:</strong> {client.email}</p>
                     <p><strong>Phone:</strong> {client.phone || 'N/A'}</p>
@@ -295,7 +307,6 @@ export default function OpportunityDetailPage() {
                     </CardHeader>
                     <CardContent className="text-sm space-y-1">
                         <p><strong>Phone:</strong> {opportunity.primaryContactPhone}</p>
-                         {/* More primary contact details can be added if OpportunityContact model stores one as primary */}
                     </CardContent>
                 </Card>
             )}
@@ -415,9 +426,6 @@ export default function OpportunityDetailPage() {
           </CardContent>
         </Card>
       </div>
-
     </div>
   );
 }
-
-    
