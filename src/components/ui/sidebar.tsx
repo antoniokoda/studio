@@ -13,8 +13,6 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
-// Tooltip components are no longer directly used by SidebarMenuButton itself
-// They will be used by the consumer (AppSidebar) if a tooltip is needed.
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -121,7 +119,6 @@ const SidebarProvider = React.forwardRef<
 
     return (
       <SidebarContext.Provider value={contextValue}>
-        {/* TooltipProvider moved to AppSidebar where Tooltips are actually used */}
         <div
           style={
             {
@@ -519,48 +516,38 @@ const sidebarMenuButtonVariants = cva(
   }
 )
 
-// Simplified SidebarMenuButton: it's always a button and doesn't handle tooltips.
-// It accepts all props a button would, plus our custom ones.
 interface SidebarMenuButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>, // Allows onClick, type, etc.
-    VariantProps<typeof sidebarMenuButtonVariants> {
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+    Omit<VariantProps<typeof sidebarMenuButtonVariants>, 'isActive'> {
   isActive?: boolean;
-  // Tooltip related props are removed as tooltip composition happens in AppSidebar
+  children: React.ReactNode;
 }
 
 const SidebarMenuButton = React.forwardRef<
   HTMLButtonElement,
   SidebarMenuButtonProps
->(
-  (
-    {
-      isActive = false,
-      variant = "default",
-      size = "default",
-      className,
-      children,
-      ...rest // Contains props from Link (href, etc.) or direct (onClick)
-    },
-    ref
-  ) => {
-    // Filter out 'asChild' if it's passed, though it's not part of the defined props.
-    // This component always renders a <button>.
-    const { asChild: _, ...finalDomProps } = rest as any;
-
-    return (
-      <button
-        ref={ref}
-        data-sidebar="menu-button"
-        data-size={size}
-        data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size, className }))}
-        {...finalDomProps} // Spread props like href, onClick
-      >
-        {children}
-      </button>
-    );
+>(({ variant = "default", size = "default", className, children, isActive, ...rest }, ref) => {
+  
+  const buttonProps = { ...rest };
+  // Explicitly delete 'asChild' from the props passed to the DOM button,
+  // regardless of its origin or type, to prevent the warning.
+  if ('asChild' in buttonProps) {
+    delete (buttonProps as { asChild?: any }).asChild;
   }
-);
+
+  return (
+    <button
+      ref={ref}
+      data-sidebar="menu-button"
+      data-size={size}
+      data-active={isActive}
+      className={cn(sidebarMenuButtonVariants({ variant, size, className }))}
+      {...buttonProps}
+    >
+      {children}
+    </button>
+  );
+});
 SidebarMenuButton.displayName = "SidebarMenuButton";
 
 
