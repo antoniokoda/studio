@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -543,54 +544,63 @@ const SidebarMenuButton = React.forwardRef<
 >(
   (
     {
-      asChild = false,
+      asChild: propAsChild = false,
       isActive = false,
       variant = "default",
       size = "default",
       tooltip,
       className,
-      ...props
+      children, // Explicitly accept children
+      ...props // All other props passed to SidebarMenuButton
     },
     ref
   ) => {
-    const Comp = asChild ? Slot : "button"
-    const { isMobile, state } = useSidebar()
+    const Comp = propAsChild ? Slot : "button";
 
-    const button = (
+    // Remove asChild from the props that will be spread, as it's already been used
+    // by propAsChild or is not applicable to the underlying element (Slot or button).
+    const { asChild: _forwardedAsChild, ...restProps } = props;
+
+    const buttonElement = (
       <Comp
         ref={ref}
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
-        className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
-        {...props}
-      />
-    )
+        className={cn(sidebarMenuButtonVariants({ variant, size, className }))}
+        {...restProps} // Spread the actual props meant for the element (like href from Link)
+      >
+        {children} {/* Render children inside Comp */}
+      </Comp>
+    );
 
     if (!tooltip) {
-      return button
+      return buttonElement;
     }
 
-    if (typeof tooltip === "string") {
-      tooltip = {
-        children: tooltip,
-      }
-    }
+    const tooltipContentProps = typeof tooltip === 'string' ? { children: tooltip } : tooltip;
+    // Casting to `any` for `aria-disabled` as it's a valid ARIA attribute but might not be in default HTMLButtonElement props
+    const isDisabled = restProps.disabled || (restProps as any)['aria-disabled'];
+
 
     return (
       <Tooltip>
-        <TooltipTrigger asChild>{button}</TooltipTrigger>
+        <TooltipTrigger asChild disabled={isDisabled}>
+          {/* TooltipTrigger needs asChild if buttonElement itself could be a Slot (which it is if propAsChild is true) */}
+          {/* This allows TooltipTrigger to correctly attach to the actual rendered element (e.g., the <a> from Link) */}
+          {buttonElement}
+        </TooltipTrigger>
         <TooltipContent
           side="right"
           align="center"
-          hidden={state !== "collapsed" || isMobile}
-          {...tooltip}
+          {...tooltipContentProps}
         />
       </Tooltip>
-    )
+    );
   }
-)
-SidebarMenuButton.displayName = "SidebarMenuButton"
+);
+SidebarMenuButton.displayName = "SidebarMenuButton";
+
 
 const SidebarMenuAction = React.forwardRef<
   HTMLButtonElement,
