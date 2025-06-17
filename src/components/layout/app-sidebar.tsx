@@ -37,7 +37,7 @@ const AppSidebar = () => {
             <SidebarMenuItem key={item.href}>
               <Link href={item.href} asChild>
                 <SidebarMenuButton
-                  asChild // Ensure SidebarMenuButton acts as a Slot for Link
+                  // removed asChild from here
                   isActive={pathname.startsWith(item.href)}
                   tooltip={{ children: item.label, side: 'right', align: 'center' }}
                   className="justify-start"
@@ -58,7 +58,7 @@ const AppSidebar = () => {
           <SidebarMenuItem>
             <Link href="/settings" asChild>
               <SidebarMenuButton
-                asChild // Ensure SidebarMenuButton acts as a Slot for Link
+                // removed asChild from here
                 tooltip={{ children: 'Settings', side: 'right', align: 'center' }}
                 className="justify-start"
                 isActive={pathname === '/settings'}

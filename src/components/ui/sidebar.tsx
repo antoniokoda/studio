@@ -524,26 +524,22 @@ const sidebarMenuButtonVariants = cva(
   }
 )
 
-// Define a more flexible type for props that can be passed to SidebarMenuButton
-// It should accommodate props for an anchor (`<a>`) or a button (`<button>`).
 type SidebarMenuButtonProps = Omit<React.HTMLAttributes<HTMLElement>, 'size' | 'onClick'> &
   React.RefAttributes<HTMLElement> &
   VariantProps<typeof sidebarMenuButtonVariants> & {
     asChild?: boolean;
     isActive?: boolean;
     tooltip?: string | React.ComponentProps<typeof TooltipContent>;
-    // Allow specific anchor or button props, or use a general [key: string]: any if needed
-    href?: string; // For when it acts as an anchor
-    onClick?: React.MouseEventHandler<HTMLElement>; // General click handler
-    // type?: "button" | "submit" | "reset"; // For when it acts as a button, though Slot might handle this
-    [key: string]: any; // Catch-all for other props like those from NextLink
+    href?: string; 
+    onClick?: React.MouseEventHandler<HTMLElement>; 
+    [key: string]: any; 
   };
 
 
 const SidebarMenuButton = React.forwardRef<HTMLElement, SidebarMenuButtonProps>(
   (
     {
-      asChild: propAsChild,
+      asChild: propAsChild = false, // Default to false if not provided
       isActive = false,
       variant = "default",
       size = "default",
@@ -554,11 +550,10 @@ const SidebarMenuButton = React.forwardRef<HTMLElement, SidebarMenuButtonProps>(
     },
     ref
   ) => {
-    const Comp = propAsChild ? Slot : "button";
+    // Filter out asChild from 'rest' to prevent it from being passed to the DOM element if Link passes it.
+    const { asChild: _internalAsChildFromRest, ...attributesToSpread } = rest;
 
-    // Explicitly remove `asChild` from `rest` props that will be spread.
-    // `propAsChild` has already served its purpose to determine `Comp`.
-    const { asChild: _internalAsChild, ...attributesToSpread } = rest;
+    const Comp = propAsChild ? Slot : "button";
 
     const buttonElement = (
       <Comp
@@ -567,7 +562,7 @@ const SidebarMenuButton = React.forwardRef<HTMLElement, SidebarMenuButtonProps>(
         data-size={size}
         data-active={isActive}
         className={cn(sidebarMenuButtonVariants({ variant, size, className }))}
-        {...attributesToSpread}
+        {...attributesToSpread} 
       >
         {children}
       </Comp>
@@ -578,19 +573,11 @@ const SidebarMenuButton = React.forwardRef<HTMLElement, SidebarMenuButtonProps>(
     }
 
     const tooltipContentProps = typeof tooltip === 'string' ? { children: tooltip } : tooltip;
-    // Casting to `any` for `aria-disabled` as it's a valid ARIA attribute.
-    const isDisabled = attributesToSpread.disabled || (attributesToSpread as any)['aria-disabled'];
+    const isDisabled = (attributesToSpread as any).disabled || (attributesToSpread as any)['aria-disabled'];
 
     return (
       <Tooltip>
-        {/*
-          If `propAsChild` is true, SidebarMenuButton's `Comp` is `Slot`.
-          `buttonElement` is essentially `<Slot ...>{children}</Slot>`.
-          `TooltipTrigger` needs `asChild={true}` so it can correctly pass its trigger
-          functionality to the underlying rendered element that `Slot` resolves to
-          (which would be the `<a>` tag from NextLink when `Link asChild` is used).
-        */}
-        <TooltipTrigger asChild={propAsChild}>
+        <TooltipTrigger asChild={propAsChild}> 
           {buttonElement}
         </TooltipTrigger>
         <TooltipContent
