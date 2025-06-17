@@ -524,51 +524,54 @@ const sidebarMenuButtonVariants = cva(
   }
 )
 
-type SidebarMenuButtonElementType = typeof Button | typeof Slot | 'button' | 'a';
+
+// Define a more specific type for props that can be passed to a button or an anchor,
+// excluding 'asChild' from these, as it's handled by the component itself.
+type DomElementProps = Omit<React.ComponentPropsWithoutRef<'button'> & React.ComponentPropsWithoutRef<'a'>, 'asChild' | 'className' | 'children'>;
 
 interface SidebarMenuButtonProps
-  extends React.HTMLAttributes<HTMLElement>, // More generic base for element attributes
-    VariantProps<typeof sidebarMenuButtonVariants> {
-  asChild?: boolean;
+  extends VariantProps<typeof sidebarMenuButtonVariants>, DomElementProps {
+  // `asChild` is NOT a prop of SidebarMenuButton itself anymore. It always renders a button.
   isActive?: boolean;
   tooltip?: string | React.ComponentProps<typeof TooltipContent>;
-  // Allow any other props (like href, onClick from Link or Button)
-  [key: string]: any;
+  className?: string;
+  children?: React.ReactNode;
+  // Allow specific props like href, onClick, type, etc., captured by DomElementProps
 }
 
 
 const SidebarMenuButton = React.forwardRef<
-  HTMLElement, // Can be HTMLButtonElement or HTMLAnchorElement or other via Slot
+  HTMLButtonElement, // It will always render a button, Link asChild will enhance it
   SidebarMenuButtonProps
 >(
   (
     {
-      asChild: propAsChild = false,
       isActive = false,
       variant = "default",
       size = "default",
       tooltip,
       className,
       children,
-      ...rest
+      // All other props (href from Link, onClick, type, etc.) are in 'domProps'
+      ...domProps 
     },
     ref
   ) => {
-    // Filter out asChild from 'rest' if it exists, as it's already handled by propAsChild
-    const { asChild: _internalAsChildFromRest, ...attributesToSpread } = rest;
-    const Comp = propAsChild ? Slot : "button";
+    // Defensively filter out 'asChild' if it somehow ended up in domProps.
+    // This is unlikely if Link asChild behaves correctly (doesn't pass its own asChild prop).
+    const { asChild: rogueAsChild, ...finalDomProps } = domProps as any;
 
     const buttonElement = (
-      <Comp
+      <button
         ref={ref}
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
         className={cn(sidebarMenuButtonVariants({ variant, size, className }))}
-        {...attributesToSpread}
+        {...finalDomProps} // Spread validated DOM/Link props
       >
         {children}
-      </Comp>
+      </button>
     );
 
     if (!tooltip) {
@@ -578,11 +581,9 @@ const SidebarMenuButton = React.forwardRef<
     const tooltipContentProps =
       typeof tooltip === "string" ? { children: tooltip } : tooltip;
     
-    // When TooltipTrigger wraps a component that might be a Slot (due to Link asChild),
-    // TooltipTrigger itself must use asChild={true} to correctly attach to the rendered element.
     return (
       <Tooltip>
-        <TooltipTrigger asChild={true}>
+        <TooltipTrigger asChild={true}> {/* TooltipTrigger uses the buttonElement as its actual trigger */}
           {buttonElement}
         </TooltipTrigger>
         <TooltipContent
@@ -764,4 +765,3 @@ export {
   SidebarTrigger,
   useSidebar,
 }
-
