@@ -524,22 +524,26 @@ const sidebarMenuButtonVariants = cva(
   }
 )
 
-type SidebarMenuButtonProps = Omit<React.HTMLAttributes<HTMLElement>, 'size' | 'onClick'> &
-  React.RefAttributes<HTMLElement> &
-  VariantProps<typeof sidebarMenuButtonVariants> & {
-    asChild?: boolean;
-    isActive?: boolean;
-    tooltip?: string | React.ComponentProps<typeof TooltipContent>;
-    href?: string; 
-    onClick?: React.MouseEventHandler<HTMLElement>; 
-    [key: string]: any; 
-  };
+type SidebarMenuButtonElementType = typeof Button | typeof Slot | 'button' | 'a';
+
+interface SidebarMenuButtonProps
+  extends React.HTMLAttributes<HTMLElement>, // More generic base for element attributes
+    VariantProps<typeof sidebarMenuButtonVariants> {
+  asChild?: boolean;
+  isActive?: boolean;
+  tooltip?: string | React.ComponentProps<typeof TooltipContent>;
+  // Allow any other props (like href, onClick from Link or Button)
+  [key: string]: any;
+}
 
 
-const SidebarMenuButton = React.forwardRef<HTMLElement, SidebarMenuButtonProps>(
+const SidebarMenuButton = React.forwardRef<
+  HTMLElement, // Can be HTMLButtonElement or HTMLAnchorElement or other via Slot
+  SidebarMenuButtonProps
+>(
   (
     {
-      asChild: propAsChild = false, // Default to false if not provided
+      asChild: propAsChild = false,
       isActive = false,
       variant = "default",
       size = "default",
@@ -550,9 +554,8 @@ const SidebarMenuButton = React.forwardRef<HTMLElement, SidebarMenuButtonProps>(
     },
     ref
   ) => {
-    // Filter out asChild from 'rest' to prevent it from being passed to the DOM element if Link passes it.
+    // Filter out asChild from 'rest' if it exists, as it's already handled by propAsChild
     const { asChild: _internalAsChildFromRest, ...attributesToSpread } = rest;
-
     const Comp = propAsChild ? Slot : "button";
 
     const buttonElement = (
@@ -562,7 +565,7 @@ const SidebarMenuButton = React.forwardRef<HTMLElement, SidebarMenuButtonProps>(
         data-size={size}
         data-active={isActive}
         className={cn(sidebarMenuButtonVariants({ variant, size, className }))}
-        {...attributesToSpread} 
+        {...attributesToSpread}
       >
         {children}
       </Comp>
@@ -572,12 +575,14 @@ const SidebarMenuButton = React.forwardRef<HTMLElement, SidebarMenuButtonProps>(
       return buttonElement;
     }
 
-    const tooltipContentProps = typeof tooltip === 'string' ? { children: tooltip } : tooltip;
-    const isDisabled = (attributesToSpread as any).disabled || (attributesToSpread as any)['aria-disabled'];
-
+    const tooltipContentProps =
+      typeof tooltip === "string" ? { children: tooltip } : tooltip;
+    
+    // When TooltipTrigger wraps a component that might be a Slot (due to Link asChild),
+    // TooltipTrigger itself must use asChild={true} to correctly attach to the rendered element.
     return (
       <Tooltip>
-        <TooltipTrigger asChild={propAsChild}> 
+        <TooltipTrigger asChild={true}>
           {buttonElement}
         </TooltipTrigger>
         <TooltipContent
@@ -759,3 +764,4 @@ export {
   SidebarTrigger,
   useSidebar,
 }
+
