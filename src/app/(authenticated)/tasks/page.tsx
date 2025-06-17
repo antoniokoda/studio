@@ -1,10 +1,11 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { PlusCircle, Edit3, Trash2, Search, Filter, ListChecks, CalendarDays, CheckCircle, RadioButton } from 'lucide-react';
+import { PlusCircle, Edit3, Trash2, Search, Filter, ListChecks, CalendarDays, CheckCircle, Radio } from 'lucide-react'; // Changed RadioButton to Radio
 import { Task, sampleTasks, Opportunity, sampleOpportunities, TaskStatus, TaskType } from '@/types/crm';
 import { Input } from '@/components/ui/input';
 import {
@@ -151,7 +152,7 @@ export default function TasksPage() {
   );
   
   const statusIcons: Record<TaskStatus, React.ElementType> = {
-    'Pending': RadioButton,
+    'Pending': Radio, // Changed RadioButton to Radio
     'In Progress': ListChecks,
     'Completed': CheckCircle,
   };
