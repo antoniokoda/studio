@@ -6,14 +6,15 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Sidebar, SidebarHeader, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarTrigger } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
-import { LayoutDashboard, Users, Phone, Briefcase, Settings, Building, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, Phone, Briefcase, Settings, Building, LogOut, ListChecks } from 'lucide-react'; // Added ListChecks for Tasks
 import { useAuth } from '@/contexts/auth-context';
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/clients', label: 'Clients', icon: Users },
-  { href: '/calls', label: 'Calls', icon: Phone },
   { href: '/opportunities', label: 'Opportunities', icon: Briefcase },
+  { href: '/calls', label: 'Calls', icon: Phone },
+  { href: '/tasks', label: 'Tasks', icon: ListChecks }, // Added Tasks
 ];
 
 const AppSidebar = () => {
@@ -36,15 +37,12 @@ const AppSidebar = () => {
             <SidebarMenuItem key={item.href}>
               <Link href={item.href} asChild>
                 <SidebarMenuButton
-                  asChild
                   isActive={pathname.startsWith(item.href)}
                   tooltip={{ children: item.label, side: 'right', align: 'center' }}
                   className="justify-start"
                 >
-                  <a>
-                    <item.icon className="h-5 w-5" />
-                    <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-                  </a>
+                  <item.icon className="h-5 w-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -57,15 +55,12 @@ const AppSidebar = () => {
           <SidebarMenuItem>
             <Link href="/settings" asChild>
               <SidebarMenuButton
-                asChild
                 tooltip={{ children: 'Settings', side: 'right', align: 'center' }}
                 className="justify-start"
                 isActive={pathname === '/settings'}
               >
-                <a>
-                  <Settings className="h-5 w-5" />
-                  <span className="group-data-[collapsible=icon]:hidden">Settings</span>
-                </a>
+                <Settings className="h-5 w-5" />
+                <span className="group-data-[collapsible=icon]:hidden">Settings</span>
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
