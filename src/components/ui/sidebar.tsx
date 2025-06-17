@@ -13,12 +13,8 @@ import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip"
+// Tooltip components are no longer directly used by SidebarMenuButton itself
+// They will be used by the consumer (AppSidebar) if a tooltip is needed.
 
 const SIDEBAR_COOKIE_NAME = "sidebar_state"
 const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7
@@ -125,25 +121,24 @@ const SidebarProvider = React.forwardRef<
 
     return (
       <SidebarContext.Provider value={contextValue}>
-        <TooltipProvider delayDuration={0}>
-          <div
-            style={
-              {
-                "--sidebar-width": SIDEBAR_WIDTH,
-                "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
-                ...style,
-              } as React.CSSProperties
-            }
-            className={cn(
-              "group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar",
-              className
-            )}
-            ref={ref}
-            {...props}
-          >
-            {children}
-          </div>
-        </TooltipProvider>
+        {/* TooltipProvider moved to AppSidebar where Tooltips are actually used */}
+        <div
+          style={
+            {
+              "--sidebar-width": SIDEBAR_WIDTH,
+              "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+              ...style,
+            } as React.CSSProperties
+          }
+          className={cn(
+            "group/sidebar-wrapper flex min-h-svh w-full has-[[data-variant=inset]]:bg-sidebar",
+            className
+          )}
+          ref={ref}
+          {...props}
+        >
+          {children}
+        </div>
       </SidebarContext.Provider>
     )
   }
@@ -524,24 +519,17 @@ const sidebarMenuButtonVariants = cva(
   }
 )
 
-
-// Define a more specific type for props that can be passed to a button or an anchor,
-// excluding 'asChild' from these, as it's handled by the component itself.
-type DomElementProps = Omit<React.ComponentPropsWithoutRef<'button'> & React.ComponentPropsWithoutRef<'a'>, 'asChild' | 'className' | 'children'>;
-
+// Simplified SidebarMenuButton: it's always a button and doesn't handle tooltips.
+// It accepts all props a button would, plus our custom ones.
 interface SidebarMenuButtonProps
-  extends VariantProps<typeof sidebarMenuButtonVariants>, DomElementProps {
-  // `asChild` is NOT a prop of SidebarMenuButton itself anymore. It always renders a button.
+  extends React.ButtonHTMLAttributes<HTMLButtonElement>, // Allows onClick, type, etc.
+    VariantProps<typeof sidebarMenuButtonVariants> {
   isActive?: boolean;
-  tooltip?: string | React.ComponentProps<typeof TooltipContent>;
-  className?: string;
-  children?: React.ReactNode;
-  // Allow specific props like href, onClick, type, etc., captured by DomElementProps
+  // Tooltip related props are removed as tooltip composition happens in AppSidebar
 }
 
-
 const SidebarMenuButton = React.forwardRef<
-  HTMLButtonElement, // It will always render a button, Link asChild will enhance it
+  HTMLButtonElement,
   SidebarMenuButtonProps
 >(
   (
@@ -549,49 +537,27 @@ const SidebarMenuButton = React.forwardRef<
       isActive = false,
       variant = "default",
       size = "default",
-      tooltip,
       className,
       children,
-      // All other props (href from Link, onClick, type, etc.) are in 'domProps'
-      ...domProps 
+      ...rest // Contains props from Link (href, etc.) or direct (onClick)
     },
     ref
   ) => {
-    // Defensively filter out 'asChild' if it somehow ended up in domProps.
-    // This is unlikely if Link asChild behaves correctly (doesn't pass its own asChild prop).
-    const { asChild: rogueAsChild, ...finalDomProps } = domProps as any;
+    // Filter out 'asChild' if it's passed, though it's not part of the defined props.
+    // This component always renders a <button>.
+    const { asChild: _, ...finalDomProps } = rest as any;
 
-    const buttonElement = (
+    return (
       <button
         ref={ref}
         data-sidebar="menu-button"
         data-size={size}
         data-active={isActive}
         className={cn(sidebarMenuButtonVariants({ variant, size, className }))}
-        {...finalDomProps} // Spread validated DOM/Link props
+        {...finalDomProps} // Spread props like href, onClick
       >
         {children}
       </button>
-    );
-
-    if (!tooltip) {
-      return buttonElement;
-    }
-
-    const tooltipContentProps =
-      typeof tooltip === "string" ? { children: tooltip } : tooltip;
-    
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild={true}> {/* TooltipTrigger uses the buttonElement as its actual trigger */}
-          {buttonElement}
-        </TooltipTrigger>
-        <TooltipContent
-          side="right"
-          align="center"
-          {...tooltipContentProps}
-        />
-      </Tooltip>
     );
   }
 );
