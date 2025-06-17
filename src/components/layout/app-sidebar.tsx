@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -33,14 +34,17 @@ const AppSidebar = () => {
         <SidebarMenu>
           {navItems.map((item) => (
             <SidebarMenuItem key={item.href}>
-              <Link href={item.href} legacyBehavior passHref>
+              <Link href={item.href} asChild>
                 <SidebarMenuButton
+                  asChild
                   isActive={pathname.startsWith(item.href)}
                   tooltip={{ children: item.label, side: 'right', align: 'center' }}
                   className="justify-start"
                 >
-                  <item.icon className="h-5 w-5" />
-                  <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                  <a>
+                    <item.icon className="h-5 w-5" />
+                    <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
+                  </a>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -51,21 +55,24 @@ const AppSidebar = () => {
       <SidebarFooter className="p-2">
         <SidebarMenu>
           <SidebarMenuItem>
-            <Link href="/settings" legacyBehavior passHref>
-              <SidebarMenuButton 
-                tooltip={{ children: 'Settings', side: 'right', align: 'center' }} 
+            <Link href="/settings" asChild>
+              <SidebarMenuButton
+                asChild
+                tooltip={{ children: 'Settings', side: 'right', align: 'center' }}
                 className="justify-start"
                 isActive={pathname === '/settings'}
               >
-                <Settings className="h-5 w-5" />
-                <span className="group-data-[collapsible=icon]:hidden">Settings</span>
+                <a>
+                  <Settings className="h-5 w-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">Settings</span>
+                </a>
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
           <SidebarMenuItem>
-             <SidebarMenuButton 
-                onClick={signOut} 
-                tooltip={{ children: 'Log Out', side: 'right', align: 'center' }} 
+             <SidebarMenuButton
+                onClick={signOut}
+                tooltip={{ children: 'Log Out', side: 'right', align: 'center' }}
                 className="justify-start text-destructive hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive"
              >
                 <LogOut className="h-5 w-5" />
