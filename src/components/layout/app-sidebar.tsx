@@ -37,15 +37,14 @@ const AppSidebar = () => {
             <SidebarMenuItem key={item.href}>
               <Link href={item.href} asChild>
                 <SidebarMenuButton
-                  // removed asChild from here
                   isActive={pathname.startsWith(item.href)}
                   tooltip={{ children: item.label, side: 'right', align: 'center' }}
                   className="justify-start"
                 >
-                  <> {/* Use a fragment if SidebarMenuButton's Slot needs a single child wrapper, though often not needed if Slot handles multiple children correctly */}
+                  <span className="flex items-center gap-2">
                     <item.icon className="h-5 w-5" />
                     <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
-                  </>
+                  </span>
                 </SidebarMenuButton>
               </Link>
             </SidebarMenuItem>
@@ -58,15 +57,14 @@ const AppSidebar = () => {
           <SidebarMenuItem>
             <Link href="/settings" asChild>
               <SidebarMenuButton
-                // removed asChild from here
                 tooltip={{ children: 'Settings', side: 'right', align: 'center' }}
                 className="justify-start"
                 isActive={pathname === '/settings'}
               >
-                <>
+                <span className="flex items-center gap-2">
                   <Settings className="h-5 w-5" />
                   <span className="group-data-[collapsible=icon]:hidden">Settings</span>
-                </>
+                </span>
               </SidebarMenuButton>
             </Link>
           </SidebarMenuItem>
@@ -76,8 +74,10 @@ const AppSidebar = () => {
                 tooltip={{ children: 'Log Out', side: 'right', align: 'center' }}
                 className="justify-start text-destructive hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive"
              >
-                <LogOut className="h-5 w-5" />
-                <span className="group-data-[collapsible=icon]:hidden">Log Out</span>
+                <span className="flex items-center gap-2">
+                  <LogOut className="h-5 w-5" />
+                  <span className="group-data-[collapsible=icon]:hidden">Log Out</span>
+                </span>
               </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
