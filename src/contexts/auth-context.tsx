@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
@@ -43,7 +44,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return userCredential.user;
     } catch (error: any) {
       console.error("Error signing in: ", error);
-      toast({ title: "Sign In Failed", description: error.message || "Please check your credentials.", variant: "destructive" });
+      let description = "Please check your credentials and try again.";
+      if (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') {
+        description = "The email or password you entered is incorrect. Please double-check and try again. Ensure you have already signed up if this is a new account.";
+      } else if (error.message) {
+        description = error.message;
+      }
+      toast({ title: "Sign In Failed", description: description, variant: "destructive" });
       return null;
     } finally {
       setIsAuthenticating(false);
@@ -96,3 +103,4 @@ export const useAuth = (): AuthContextType => {
   }
   return context;
 };
+
