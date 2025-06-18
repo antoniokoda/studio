@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -52,18 +51,19 @@ const AppSidebar = () => {
               <SidebarMenuItem key={item.href}>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Link href={item.href} asChild>
-                      <SidebarMenuButton
-                        isActive={pathname.startsWith(item.href)}
-                        className="justify-start"
-                        aria-label={item.label}
-                      >
+                    <SidebarMenuButton
+                      asChild
+                      isActive={pathname.startsWith(item.href)}
+                      className="justify-start"
+                      aria-label={item.label}
+                    >
+                      <Link href={item.href}>
                         <span className="flex items-center gap-2">
                            <item.icon className="h-5 w-5" />
                            <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
                         </span>
-                      </SidebarMenuButton>
-                    </Link>
+                      </Link>
+                    </SidebarMenuButton>
                   </TooltipTrigger>
                   <TooltipContent side="right" align="center">
                     {item.label}
@@ -79,18 +79,19 @@ const AppSidebar = () => {
             <SidebarMenuItem>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <Link href="/settings" asChild>
-                    <SidebarMenuButton
-                      className="justify-start"
-                      isActive={pathname === '/settings'}
-                      aria-label="Settings"
-                    >
+                  <SidebarMenuButton
+                    asChild
+                    className="justify-start"
+                    isActive={pathname === '/settings'}
+                    aria-label="Settings"
+                  >
+                    <Link href="/settings">
                       <span className="flex items-center gap-2">
                         <Settings className="h-5 w-5" />
                         <span className="group-data-[collapsible=icon]:hidden">Settings</span>
                       </span>
-                    </SidebarMenuButton>
-                  </Link>
+                    </Link>
+                  </SidebarMenuButton>
                 </TooltipTrigger>
                 <TooltipContent side="right" align="center">
                   Settings
