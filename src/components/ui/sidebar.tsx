@@ -8,7 +8,7 @@ import { PanelLeft } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { Button, ButtonProps } from "@/components/ui/button" // Keep ButtonProps for extending
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
@@ -516,38 +516,49 @@ const sidebarMenuButtonVariants = cva(
   }
 )
 
+// Combined type for props that can be passed to an 'a' or 'button'
+type AnchorOrButtonProps = React.DetailedHTMLProps<
+  React.AnchorHTMLAttributes<HTMLAnchorElement> & React.ButtonHTMLAttributes<HTMLButtonElement>,
+  HTMLAnchorElement | HTMLButtonElement
+>;
+
 interface SidebarMenuButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends Omit<AnchorOrButtonProps, 'size'>, // Omit size from HTML attributes to use our variant
     Omit<VariantProps<typeof sidebarMenuButtonVariants>, "isActive"> {
   isActive?: boolean;
   children: React.ReactNode;
+  href?: string; // Make href optional
 }
 
 const SidebarMenuButton = React.forwardRef<
-  HTMLButtonElement,
+  HTMLAnchorElement | HTMLButtonElement, // Ref can be to an anchor or button
   SidebarMenuButtonProps
->(({ variant = "default", size = "default", className, children, isActive, ...parentProps }, ref) => {
-  
-  // Create a mutable copy of parentProps to safely delete asChild
-  const finalButtonProps = { ...parentProps };
+>(({ className, variant, size, children, isActive, href, ...rest }, ref) => {
+  const Comp = href ? "a" : "button";
 
-  // Explicitly delete asChild if it exists on the copied object
-  // This is the key change to ensure 'asChild' is not passed to the DOM button
-  if ('asChild' in finalButtonProps) {
-    delete (finalButtonProps as { asChild?: any }).asChild;
+  // Explicitly delete asChild from the props to be spread, as it's not for the DOM element
+  const finalProps = { ...rest };
+  if ('asChild' in finalProps) {
+    delete (finalProps as { asChild?: any }).asChild;
+  }
+  // Also delete type if it's an anchor, as 'type' is not a valid prop for <a>
+  if (Comp === 'a' && 'type' in finalProps) {
+    delete (finalProps as { type?: any }).type;
   }
 
+
   return (
-    <button
-      ref={ref}
+    <Comp
+      ref={ref as any} // Cast ref as any due to conditional Comp type
       data-sidebar="menu-button"
       data-size={size}
-      data-active={isActive || undefined} // Ensure undefined if false, for data-attribute cleanliness
+      data-active={isActive || undefined}
       className={cn(sidebarMenuButtonVariants({ variant, size, className }))}
-      {...finalButtonProps} // Spread the cleaned props
+      href={href} // Only pass href if Comp is 'a' (implicitly handled by spreading if href is in finalProps)
+      {...finalProps} // Spread the cleaned props
     >
       {children}
-    </button>
+    </Comp>
   );
 });
 SidebarMenuButton.displayName = "SidebarMenuButton";
@@ -720,4 +731,3 @@ export {
   SidebarTrigger,
   useSidebar,
 }
-
