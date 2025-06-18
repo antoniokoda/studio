@@ -516,28 +516,29 @@ const sidebarMenuButtonVariants = cva(
   }
 )
 
-interface SidebarMenuButtonProps extends BaseButtonProps {
+interface SidebarMenuButtonProps extends Omit<BaseButtonProps, 'asChild'> {
   isActive?: boolean;
-  // variant and size are part of BaseButtonProps and will be used by CVA
+  asChild?: boolean; // Explicitly define asChild for SidebarMenuButton
 }
 
 const SidebarMenuButton = React.forwardRef<
-  HTMLButtonElement, // The ref type for the underlying ShadCN Button
+  React.ElementRef<typeof Button>,
   SidebarMenuButtonProps
->(({ className, children, isActive, variant, size, ...props }, ref) => {
+>(({ className, children, isActive, variant, size, asChild: propAsChild, ...rest }, ref) => {
+  // Remove any 'asChild' from 'rest' to prevent it from being spread if it's already handled by 'propAsChild'
+  // This is a defensive measure.
+  const { asChild: _asChildFromRest, ...buttonProps } = rest as any;
+
   return (
     <Button
       ref={ref}
-      // Pass variant and size to the base Button if they are compatible,
-      // and also use them for applying CVA styles.
-      // The type assertion (as any) is to satisfy TypeScript if the CVA variants
-      // are defined slightly differently but map conceptually.
-      variant={variant as BaseButtonProps['variant']}
-      size={size as BaseButtonProps['size']}
+      asChild={propAsChild} // Use the asChild prop passed directly to SidebarMenuButton
+      variant={variant}
+      size={size}
       className={cn(sidebarMenuButtonVariants({ variant: variant as any, size: size as any, className }))}
       data-sidebar="menu-button"
       data-active={isActive || undefined}
-      {...props} // Spreads all other props, including asChild, href, onClick, etc.
+      {...buttonProps} // Spread the cleaned props
     >
       {children}
     </Button>
