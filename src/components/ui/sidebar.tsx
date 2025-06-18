@@ -8,7 +8,7 @@ import { PanelLeft } from "lucide-react"
 
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
-import { Button, ButtonProps } from "@/components/ui/button" // Keep ButtonProps for extending
+import { Button, type ButtonProps as BaseButtonProps } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Separator } from "@/components/ui/separator"
 import { Sheet, SheetContent } from "@/components/ui/sheet"
@@ -516,49 +516,31 @@ const sidebarMenuButtonVariants = cva(
   }
 )
 
-// Combined type for props that can be passed to an 'a' or 'button'
-type AnchorOrButtonProps = React.DetailedHTMLProps<
-  React.AnchorHTMLAttributes<HTMLAnchorElement> & React.ButtonHTMLAttributes<HTMLButtonElement>,
-  HTMLAnchorElement | HTMLButtonElement
->;
-
-interface SidebarMenuButtonProps
-  extends Omit<AnchorOrButtonProps, 'size'>, // Omit size from HTML attributes to use our variant
-    Omit<VariantProps<typeof sidebarMenuButtonVariants>, "isActive"> {
+interface SidebarMenuButtonProps extends BaseButtonProps {
   isActive?: boolean;
-  children: React.ReactNode;
-  href?: string; // Make href optional
+  // variant and size are part of BaseButtonProps and will be used by CVA
 }
 
 const SidebarMenuButton = React.forwardRef<
-  HTMLAnchorElement | HTMLButtonElement, // Ref can be to an anchor or button
+  HTMLButtonElement, // The ref type for the underlying ShadCN Button
   SidebarMenuButtonProps
->(({ className, variant, size, children, isActive, href, ...rest }, ref) => {
-  const Comp = href ? "a" : "button";
-
-  // Explicitly delete asChild from the props to be spread, as it's not for the DOM element
-  const finalProps = { ...rest };
-  if ('asChild' in finalProps) {
-    delete (finalProps as { asChild?: any }).asChild;
-  }
-  // Also delete type if it's an anchor, as 'type' is not a valid prop for <a>
-  if (Comp === 'a' && 'type' in finalProps) {
-    delete (finalProps as { type?: any }).type;
-  }
-
-
+>(({ className, children, isActive, variant, size, ...props }, ref) => {
   return (
-    <Comp
-      ref={ref as any} // Cast ref as any due to conditional Comp type
+    <Button
+      ref={ref}
+      // Pass variant and size to the base Button if they are compatible,
+      // and also use them for applying CVA styles.
+      // The type assertion (as any) is to satisfy TypeScript if the CVA variants
+      // are defined slightly differently but map conceptually.
+      variant={variant as BaseButtonProps['variant']}
+      size={size as BaseButtonProps['size']}
+      className={cn(sidebarMenuButtonVariants({ variant: variant as any, size: size as any, className }))}
       data-sidebar="menu-button"
-      data-size={size}
       data-active={isActive || undefined}
-      className={cn(sidebarMenuButtonVariants({ variant, size, className }))}
-      href={href} // Only pass href if Comp is 'a' (implicitly handled by spreading if href is in finalProps)
-      {...finalProps} // Spread the cleaned props
+      {...props} // Spreads all other props, including asChild, href, onClick, etc.
     >
       {children}
-    </Comp>
+    </Button>
   );
 });
 SidebarMenuButton.displayName = "SidebarMenuButton";
@@ -731,3 +713,4 @@ export {
   SidebarTrigger,
   useSidebar,
 }
+

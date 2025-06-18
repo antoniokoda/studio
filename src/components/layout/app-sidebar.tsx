@@ -50,26 +50,25 @@ const AppSidebar = () => {
           <SidebarMenu>
             {navItems.map((item) => (
               <SidebarMenuItem key={item.href}>
-                <Link href={item.href} passHref legacyBehavior>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link href={item.href} asChild>
                       <SidebarMenuButton
                         isActive={pathname.startsWith(item.href)}
                         className="justify-start"
                         aria-label={item.label}
                       >
-                        {/* Single child for SidebarMenuButton for simplicity with slotting */}
                         <span className="flex items-center gap-2">
                            <item.icon className="h-5 w-5" />
                            <span className="group-data-[collapsible=icon]:hidden">{item.label}</span>
                         </span>
                       </SidebarMenuButton>
-                    </TooltipTrigger>
-                    <TooltipContent side="right" align="center">
-                      {item.label}
-                    </TooltipContent>
-                  </Tooltip>
-                </Link>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent side="right" align="center">
+                    {item.label}
+                  </TooltipContent>
+                </Tooltip>
               </SidebarMenuItem>
             ))}
           </SidebarMenu>
@@ -78,9 +77,9 @@ const AppSidebar = () => {
         <SidebarFooter className="p-2">
           <SidebarMenu>
             <SidebarMenuItem>
-              <Link href="/settings" passHref legacyBehavior>
-                <Tooltip>
-                  <TooltipTrigger asChild>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Link href="/settings" asChild>
                     <SidebarMenuButton
                       className="justify-start"
                       isActive={pathname === '/settings'}
@@ -91,12 +90,12 @@ const AppSidebar = () => {
                         <span className="group-data-[collapsible=icon]:hidden">Settings</span>
                       </span>
                     </SidebarMenuButton>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" align="center">
-                    Settings
-                  </TooltipContent>
-                </Tooltip>
-              </Link>
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="right" align="center">
+                  Settings
+                </TooltipContent>
+              </Tooltip>
             </SidebarMenuItem>
             <SidebarMenuItem>
               <Tooltip>
@@ -125,3 +124,4 @@ const AppSidebar = () => {
 };
 
 export default AppSidebar;
+
