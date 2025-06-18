@@ -31,12 +31,12 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import Link from 'next/link';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger, SheetClose } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
 import OpportunityDetailSheetContent from '@/components/opportunities/OpportunityDetailSheetContent';
 
 
@@ -349,10 +349,7 @@ export default function OpportunitiesPage() {
   };
   
   const handleEditOpportunity = (opportunity: Opportunity) => {
-    // If form is used for editing, this can remain.
-    // If sheet handles editing, this might just open the sheet.
-    // For now, let's make "Edit" also open the sheet.
-    setEditingOpportunity(opportunity); // Keep this if OpportunityForm is still used for editing from sheet later
+    setEditingOpportunity(opportunity); 
     handleOpenSheet(opportunity);
   };
 
@@ -540,185 +537,182 @@ export default function OpportunitiesPage() {
         </div>
       </div>
       
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
-        <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'table' | 'kanban')}>
+      <Tabs value={viewMode} onValueChange={(value) => setViewMode(value as 'table' | 'kanban')} className="w-full">
+        <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
             <TabsList>
                 <TabsTrigger value="table"><List className="mr-2 h-4 w-4"/>Table View</TabsTrigger>
                 <TabsTrigger value="kanban"><LayoutGrid className="mr-2 h-4 w-4"/>Kanban View</TabsTrigger>
             </TabsList>
-        </Tabs>
-        <div className="flex gap-2 items-center w-full sm:w-auto">
-            <div className="relative flex-grow sm:flex-grow-0 sm:w-64">
-                <Label htmlFor="process-filter" className="sr-only">Filter by Process</Label>
-                <Select value={selectedProcessId} onValueChange={setSelectedProcessId}>
-                    <SelectTrigger id="process-filter">
-                        <SelectValue placeholder="All Processes" />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="">All Processes</SelectItem>
-                        {processes.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
-                    </SelectContent>
-                </Select>
-            </div>
-            <div className="relative flex-grow sm:flex-grow-0 sm:w-64">
-              <Input 
-                placeholder="Search opportunities..." 
-                value={searchTerm} 
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <div className="flex gap-2 items-center w-full sm:w-auto">
+                <div className="relative flex-grow sm:flex-grow-0 sm:w-64">
+                    <Label htmlFor="process-filter" className="sr-only">Filter by Process</Label>
+                    <Select value={selectedProcessId} onValueChange={setSelectedProcessId}>
+                        <SelectTrigger id="process-filter">
+                            <SelectValue placeholder="All Processes" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="">All Processes</SelectItem>
+                            {processes.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+                        </SelectContent>
+                    </Select>
+                </div>
+                <div className="relative flex-grow sm:flex-grow-0 sm:w-64">
+                  <Input 
+                    placeholder="Search opportunities..." 
+                    value={searchTerm} 
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                  <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                </div>
             </div>
         </div>
-      </div>
 
-      <Sheet open={isSheetOpen} onOpenChange={(open) => { setIsSheetOpen(open); if (!open) setSelectedOpportunityForSheet(null);}}>
-        {/* SheetTrigger is not needed here as we trigger it programmatically */}
-        <SheetContent className="w-full sm:w-3/4 p-0 overflow-y-auto">
-          {selectedOpportunityForSheet && (
-            <>
-              <SheetHeader className="p-6 border-b">
-                <SheetTitle>{selectedOpportunityForSheet.name}</SheetTitle>
-                <SheetDescription>
-                  View and manage opportunity details. Changes made here will reflect globally.
-                  <SheetClose className="absolute right-4 top-4" />
-                </SheetDescription>
-              </SheetHeader>
-              <div className="p-6">
-                <OpportunityDetailSheetContent 
-                    opportunity={selectedOpportunityForSheet}
-                    client={clients.find(c => c.id === selectedOpportunityForSheet.clientId)}
-                    relatedCalls={allCalls.filter(call => call.opportunityId === selectedOpportunityForSheet.id)}
-                    relatedTasks={allTasks.filter(task => task.relatedOpportunityId === selectedOpportunityForSheet.id)}
-                    relatedNotes={allNotes.filter(note => note.opportunityId === selectedOpportunityForSheet.id)}
-                    relatedFiles={allFiles.filter(file => file.opportunityId === selectedOpportunityForSheet.id)}
-                    relatedContacts={allContacts.filter(contact => contact.opportunityId === selectedOpportunityForSheet.id)}
-                    onSaveOpportunity={(updatedOpp) => {
-                        // This is a simplified save. A real app would persist this to a backend.
-                        setOpportunities(prevOps => prevOps.map(o => o.id === updatedOpp.id ? updatedOpp : o));
-                        setSelectedOpportunityForSheet(updatedOpp); // Update the sheet's view
-                        toast({ title: "Opportunity Updated", description: "Details saved in sheet." });
-                    }}
-                />
-              </div>
-            </>
-          )}
-        </SheetContent>
-      </Sheet>
-
-
-      <TabsContent value="table" className="mt-0">
-        <Card className="shadow-lg">
-            <CardHeader>
-                <CardTitle>Opportunity Pipeline</CardTitle>
-            </CardHeader>
-            <CardContent>
-            {filteredOpportunities.length > 0 ? (
-                <div className="overflow-x-auto">
-                <Table>
-                <TableHeader>
-                    <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Client</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Process</TableHead>
-                    <TableHead>Stage</TableHead>
-                    <TableHead>Value</TableHead>
-                    <TableHead>Close Date</TableHead>
-                    <TableHead>Contact Phone</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {filteredOpportunities.map((opp) => (
-                    <TableRow key={opp.id} className="hover:bg-muted/50">
-                        <TableCell className="font-medium">
-                            <Button variant="link" className="p-0 h-auto hover:underline text-primary" onClick={() => handleOpenSheet(opp)}>
-                                {opp.name}
-                            </Button>
-                        </TableCell>
-                        <TableCell>{opp.clientName || 'N/A'}</TableCell>
-                        <TableCell>
-                        <Badge className={`${statusColors[opp.status]} border font-semibold`}>{opp.status}</Badge>
-                        </TableCell>
-                        <TableCell>{opp.processName || 'N/A'}</TableCell>
-                        <TableCell>{opp.stageName || 'N/A'}</TableCell>
-                        <TableCell>${opp.value.toLocaleString()}</TableCell>
-                        <TableCell>{new Date(opp.closeDate).toLocaleDateString()}</TableCell>
-                        <TableCell>{opp.primaryContactPhone || 'N/A'}</TableCell>
-                        <TableCell className="text-right">
-                           <Button variant="ghost" size="icon" onClick={() => handleEditOpportunity(opp)} className="mr-1 hover:text-primary" title="Edit / View Details">
-                            <Edit3 className="h-4 w-4" />
-                            <span className="sr-only">Edit / View Details</span>
-                          </Button>
-                          <Button variant="ghost" size="icon" asChild className="mr-1 hover:text-primary" title="Open Full Page">
-                            <Link href={`/opportunities/${opp.id}`} target="_blank">
-                               <ExternalLink className="h-4 w-4" />
-                               <span className="sr-only">Open Full Page</span>
-                            </Link>
-                           </Button>
-                          <Button variant="ghost" size="icon" onClick={() => handleDeleteOpportunity(opp.id)} className="hover:text-destructive" title="Delete">
-                            <Trash2 className="h-4 w-4" />
-                            <span className="sr-only">Delete</span>
-                          </Button>
-                        </TableCell>
-                    </TableRow>
-                    ))}
-                </TableBody>
-                </Table>
+        <Sheet open={isSheetOpen} onOpenChange={(open) => { setIsSheetOpen(open); if (!open) setSelectedOpportunityForSheet(null);}}>
+            <SheetContent className="w-full sm:w-3/4 p-0 overflow-y-auto">
+            {selectedOpportunityForSheet && (
+                <>
+                <SheetHeader className="p-6 border-b">
+                    <SheetTitle>{selectedOpportunityForSheet.name}</SheetTitle>
+                    <SheetDescription>
+                    View and manage opportunity details. Changes made here will reflect globally.
+                    <SheetClose className="absolute right-4 top-4" />
+                    </SheetDescription>
+                </SheetHeader>
+                <div className="p-6">
+                    <OpportunityDetailSheetContent 
+                        opportunity={selectedOpportunityForSheet}
+                        client={clients.find(c => c.id === selectedOpportunityForSheet.clientId)}
+                        relatedCalls={allCalls.filter(call => call.opportunityId === selectedOpportunityForSheet.id)}
+                        relatedTasks={allTasks.filter(task => task.relatedOpportunityId === selectedOpportunityForSheet.id)}
+                        relatedNotes={allNotes.filter(note => note.opportunityId === selectedOpportunityForSheet.id)}
+                        relatedFiles={allFiles.filter(file => file.opportunityId === selectedOpportunityForSheet.id)}
+                        relatedContacts={allContacts.filter(contact => contact.opportunityId === selectedOpportunityForSheet.id)}
+                        onSaveOpportunity={(updatedOpp) => {
+                            setOpportunities(prevOps => prevOps.map(o => o.id === updatedOpp.id ? updatedOpp : o));
+                            setSelectedOpportunityForSheet(updatedOpp); 
+                            toast({ title: "Opportunity Updated", description: "Details saved in sheet." });
+                        }}
+                    />
                 </div>
-            ) : (
-                <div className="text-center py-8">
-                <p className="text-muted-foreground">No opportunities found. {searchTerm || selectedProcessId ? "Try adjusting your search or filters." : ""}</p>
-                {!searchTerm && !selectedProcessId && 
-                    <Button variant="link" onClick={() => setIsFormOpen(true)} className="mt-2">
-                    Add your first opportunity
-                    </Button>
-                }
-                </div>
+                </>
             )}
-            </CardContent>
-        </Card>
-      </TabsContent>
-      <TabsContent value="kanban" className="mt-0">
-         <Card className="shadow-lg">
-            <CardHeader>
-                <CardTitle>Kanban View</CardTitle>
-                <CardDescription>
-                    {selectedProcessId ? `Displaying opportunities for process: ${processes.find(p => p.id === selectedProcessId)?.name}` : "Select a process to view opportunities in Kanban."}
-                </CardDescription>
-            </CardHeader>
-            <CardContent>
-                {selectedProcessId ? (
-                     <div className="text-center py-8">
-                        <p className="text-muted-foreground">Kanban board for '{processes.find(p => p.id === selectedProcessId)?.name}' coming soon!</p>
-                        {/* Placeholder for Kanban columns and cards */}
-                        <div className="mt-4 flex space-x-4 overflow-x-auto p-4 bg-muted rounded-md">
-                            {stages.filter(s => s.processId === selectedProcessId).sort((a,b)=> a.order - b.order).map(stage => (
-                                <div key={stage.id} className="min-w-[250px] bg-card p-3 rounded-lg shadow">
-                                    <h3 className="font-semibold mb-2 text-foreground">{stage.name}</h3>
-                                    {/* filter opportunities for this stage and render cards */}
-                                    {filteredOpportunities.filter(op => op.stageId === stage.id).map(op => (
-                                        <Card key={op.id} className="mb-2 p-2 cursor-pointer hover:shadow-md" onClick={() => handleOpenSheet(op)}>
-                                            <CardTitle className="text-sm">{op.name}</CardTitle>
-                                            <CardDescription className="text-xs">${op.value.toLocaleString()} - {op.clientName || 'N/A'}</CardDescription>
-                                        </Card>
-                                    ))}
-                                    {filteredOpportunities.filter(op => op.stageId === stage.id).length === 0 && (
-                                        <p className="text-xs text-muted-foreground">No opportunities in this stage.</p>
-                                    )}
-                                </div>
-                            ))}
-                        </div>
+            </SheetContent>
+        </Sheet>
+
+
+        <TabsContent value="table" className="mt-0">
+            <Card className="shadow-lg">
+                <CardHeader>
+                    <CardTitle>Opportunity Pipeline</CardTitle>
+                </CardHeader>
+                <CardContent>
+                {filteredOpportunities.length > 0 ? (
+                    <div className="overflow-x-auto">
+                    <Table>
+                    <TableHeader>
+                        <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Client</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Process</TableHead>
+                        <TableHead>Stage</TableHead>
+                        <TableHead>Value</TableHead>
+                        <TableHead>Close Date</TableHead>
+                        <TableHead>Contact Phone</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {filteredOpportunities.map((opp) => (
+                        <TableRow key={opp.id} className="hover:bg-muted/50">
+                            <TableCell className="font-medium">
+                                <Button variant="link" className="p-0 h-auto hover:underline text-primary" onClick={() => handleOpenSheet(opp)}>
+                                    {opp.name}
+                                </Button>
+                            </TableCell>
+                            <TableCell>{opp.clientName || 'N/A'}</TableCell>
+                            <TableCell>
+                            <Badge className={`${statusColors[opp.status]} border font-semibold`}>{opp.status}</Badge>
+                            </TableCell>
+                            <TableCell>{opp.processName || 'N/A'}</TableCell>
+                            <TableCell>{opp.stageName || 'N/A'}</TableCell>
+                            <TableCell>${opp.value.toLocaleString()}</TableCell>
+                            <TableCell>{new Date(opp.closeDate).toLocaleDateString()}</TableCell>
+                            <TableCell>{opp.primaryContactPhone || 'N/A'}</TableCell>
+                            <TableCell className="text-right">
+                            <Button variant="ghost" size="icon" onClick={() => handleEditOpportunity(opp)} className="mr-1 hover:text-primary" title="Edit / View Details">
+                                <Edit3 className="h-4 w-4" />
+                                <span className="sr-only">Edit / View Details</span>
+                            </Button>
+                            <Button variant="ghost" size="icon" asChild className="mr-1 hover:text-primary" title="Open Full Page">
+                                <Link href={`/opportunities/${opp.id}`} target="_blank">
+                                <ExternalLink className="h-4 w-4" />
+                                <span className="sr-only">Open Full Page</span>
+                                </Link>
+                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleDeleteOpportunity(opp.id)} className="hover:text-destructive" title="Delete">
+                                <Trash2 className="h-4 w-4" />
+                                <span className="sr-only">Delete</span>
+                            </Button>
+                            </TableCell>
+                        </TableRow>
+                        ))}
+                    </TableBody>
+                    </Table>
                     </div>
                 ) : (
                     <div className="text-center py-8">
-                        <p className="text-muted-foreground">Please select a Sales Process above to see the Kanban view.</p>
+                    <p className="text-muted-foreground">No opportunities found. {searchTerm || selectedProcessId ? "Try adjusting your search or filters." : ""}</p>
+                    {!searchTerm && !selectedProcessId && 
+                        <Button variant="link" onClick={() => setIsFormOpen(true)} className="mt-2">
+                        Add your first opportunity
+                        </Button>
+                    }
                     </div>
                 )}
-            </CardContent>
-        </Card>
-      </TabsContent>
+                </CardContent>
+            </Card>
+        </TabsContent>
+        <TabsContent value="kanban" className="mt-0">
+            <Card className="shadow-lg">
+                <CardHeader>
+                    <CardTitle>Kanban View</CardTitle>
+                    <CardDescription>
+                        {selectedProcessId ? `Displaying opportunities for process: ${processes.find(p => p.id === selectedProcessId)?.name}` : "Select a process to view opportunities in Kanban."}
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    {selectedProcessId ? (
+                        <div className="flex space-x-4 overflow-x-auto p-4 bg-muted rounded-md min-h-[400px]">
+                            {stages.filter(s => s.processId === selectedProcessId).sort((a,b)=> a.order - b.order).map(stage => (
+                                <div key={stage.id} className="min-w-[280px] w-[280px] bg-card p-3 rounded-lg shadow flex flex-col">
+                                    <h3 className="font-semibold mb-3 text-foreground px-1">{stage.name}</h3>
+                                    <div className="flex-grow space-y-2 overflow-y-auto">
+                                        {filteredOpportunities.filter(op => op.stageId === stage.id).map(op => (
+                                            <Card key={op.id} className="p-3 cursor-pointer hover:shadow-md bg-background" onClick={() => handleOpenSheet(op)}>
+                                                <CardTitle className="text-sm font-medium">{op.name}</CardTitle>
+                                                <CardDescription className="text-xs mt-1">${op.value.toLocaleString()} - {op.clientName || 'N/A'}</CardDescription>
+                                                <Badge variant="outline" className="mt-2 text-xs">{op.status}</Badge>
+                                            </Card>
+                                        ))}
+                                        {filteredOpportunities.filter(op => op.stageId === stage.id).length === 0 && (
+                                            <p className="text-xs text-muted-foreground text-center py-4">No opportunities in this stage.</p>
+                                        )}
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8">
+                            <p className="text-muted-foreground">Please select a Sales Process above to see the Kanban view.</p>
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
+
