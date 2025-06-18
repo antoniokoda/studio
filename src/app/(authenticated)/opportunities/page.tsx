@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, ChangeEvent } from 'react';
@@ -57,14 +56,14 @@ const OpportunityForm = ({
     onCancel: () => void 
 }) => {
   const [name, setName] = useState(opportunity?.name || '');
-  const [clientId, setClientId] = useState(opportunity?.clientId || '');
+  const [clientId, setClientId] = useState(opportunity?.clientId || 'none');
   const [primaryContactPhone, setPrimaryContactPhone] = useState(opportunity?.primaryContactPhone || '');
   
   const [status, setStatus] = useState<OpportunityStatus>(opportunity?.status || 'Activa');
   const [proposalStatus, setProposalStatus] = useState<OpportunityProposalStatus>(opportunity?.proposalStatus || 'N/A');
   
-  const [processId, setProcessId] = useState(opportunity?.processId || '');
-  const [stageId, setStageId] = useState(opportunity?.stageId || '');
+  const [processId, setProcessId] = useState(opportunity?.processId || 'none');
+  const [stageId, setStageId] = useState(opportunity?.stageId || 'none');
 
   const [value, setValue] = useState(opportunity?.value?.toString() || '');
   const [billingAmountEUR, setBillingAmountEUR] = useState(opportunity?.billingAmountEUR?.toString() || '');
@@ -80,7 +79,7 @@ const OpportunityForm = ({
 
   useEffect(() => {
     if (processId && !availableStages.find(s => s.id === stageId)) {
-      setStageId('');
+      setStageId('none');
     }
   }, [processId, stageId, availableStages]);
 
@@ -90,21 +89,21 @@ const OpportunityForm = ({
         toast({ title: "Validation Error", description: "Name, Status, Value, and Close Date are required.", variant: "destructive"});
         return;
     }
-    const selectedClient = clients.find(c => c.id === clientId);
-    const selectedProcess = processes.find(p => p.id === processId);
-    const selectedStage = stages.find(s => s.id === stageId);
+    const selectedClient = clients.find(c => c.id === (clientId === 'none' ? undefined : clientId));
+    const selectedProcess = processes.find(p => p.id === (processId === 'none' ? undefined : processId));
+    const selectedStage = stages.find(s => s.id === (stageId === 'none' ? undefined : stageId));
 
     onSave({
       id: opportunity?.id || Date.now().toString(),
       name,
-      clientId: clientId || undefined,
+      clientId: clientId === 'none' ? undefined : clientId,
       clientName: selectedClient?.name,
       primaryContactPhone,
       status,
       proposalStatus: proposalStatus === 'N/A' ? undefined : proposalStatus,
-      processId: processId || undefined,
+      processId: processId === 'none' ? undefined : processId,
       processName: selectedProcess?.name,
-      stageId: stageId || undefined,
+      stageId: stageId === 'none' ? undefined : stageId,
       stageName: selectedStage?.name,
       value: parseFloat(value),
       billingAmountEUR: billingAmountEUR ? parseFloat(billingAmountEUR) : undefined,
@@ -132,7 +131,10 @@ const OpportunityForm = ({
             <Label htmlFor="opp-client">Client</Label>
             <Select value={clientId} onValueChange={setClientId}>
             <SelectTrigger id="opp-client"><SelectValue placeholder="Select a client" /></SelectTrigger>
-            <SelectContent>{clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}</SelectContent>
+            <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                {clients.map(c => <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>)}
+            </SelectContent>
             </Select>
         </div>
         <div>
@@ -163,7 +165,10 @@ const OpportunityForm = ({
             <Label htmlFor="opp-process">Process</Label>
             <Select value={processId} onValueChange={setProcessId}>
             <SelectTrigger id="opp-process"><SelectValue placeholder="Select process" /></SelectTrigger>
-            <SelectContent>{processes.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}</SelectContent>
+            <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                {processes.map(p => <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>)}
+            </SelectContent>
             </Select>
         </div>
         <div>
@@ -171,6 +176,7 @@ const OpportunityForm = ({
             <Select value={stageId} onValueChange={setStageId} disabled={!processId || availableStages.length === 0}>
             <SelectTrigger id="opp-stage"><SelectValue placeholder={processId ? "Select stage" : "Select process first"} /></SelectTrigger>
             <SelectContent>
+                <SelectItem value="none">None</SelectItem>
                 {availableStages.map(s => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
             </SelectContent>
             </Select>
