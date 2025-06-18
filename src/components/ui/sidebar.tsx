@@ -518,7 +518,7 @@ const sidebarMenuButtonVariants = cva(
 
 interface SidebarMenuButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    Omit<VariantProps<typeof sidebarMenuButtonVariants>, 'isActive'> {
+    Omit<VariantProps<typeof sidebarMenuButtonVariants>, "isActive"> {
   isActive?: boolean;
   children: React.ReactNode;
 }
@@ -526,13 +526,15 @@ interface SidebarMenuButtonProps
 const SidebarMenuButton = React.forwardRef<
   HTMLButtonElement,
   SidebarMenuButtonProps
->(({ variant = "default", size = "default", className, children, isActive, ...rest }, ref) => {
+>(({ variant = "default", size = "default", className, children, isActive, ...parentProps }, ref) => {
   
-  const buttonProps = { ...rest };
-  // Explicitly delete 'asChild' from the props passed to the DOM button,
-  // regardless of its origin or type, to prevent the warning.
-  if ('asChild' in buttonProps) {
-    delete (buttonProps as { asChild?: any }).asChild;
+  // Create a mutable copy of parentProps to safely delete asChild
+  const finalButtonProps = { ...parentProps };
+
+  // Explicitly delete asChild if it exists on the copied object
+  // This is the key change to ensure 'asChild' is not passed to the DOM button
+  if ('asChild' in finalButtonProps) {
+    delete (finalButtonProps as { asChild?: any }).asChild;
   }
 
   return (
@@ -540,9 +542,9 @@ const SidebarMenuButton = React.forwardRef<
       ref={ref}
       data-sidebar="menu-button"
       data-size={size}
-      data-active={isActive}
+      data-active={isActive || undefined} // Ensure undefined if false, for data-attribute cleanliness
       className={cn(sidebarMenuButtonVariants({ variant, size, className }))}
-      {...buttonProps}
+      {...finalButtonProps} // Spread the cleaned props
     >
       {children}
     </button>
@@ -718,3 +720,4 @@ export {
   SidebarTrigger,
   useSidebar,
 }
+
